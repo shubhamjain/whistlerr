@@ -7,8 +7,20 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<link href='http://fonts.googleapis.com/css?family=Imprima' rel='stylesheet' type='text/css'>
 	<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
-	<link href="style.css" rel="stylesheet" type='text/css'>
+	<style type="text/css">
+	body
+	{
+		background: #FAF8EF;
+		font-family: 'Imprima', sans-serif;
+	}
+	</style>
 	<script type="text/javascript" src="whistle.js"></script>
+	<script type="text/javascript">
+		callback = function(){
+			document.getElementById("log").innerHTML += "Whistle at: " + new Date() + "\n";
+		};
+		whistlerr(callback);
+	</script>
 </head>
 <body>
 	<div class="container fixed-width">
