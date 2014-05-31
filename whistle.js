@@ -2,13 +2,13 @@ function whistlerr(whistleCallback){
 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
 	var audioContext = new AudioContext();
 
-	function getUserMedia(dictionary, callback) {
+	function getUserMedia(dictionary, callback, error) {
 		try {
 			navigator.getUserMedia = 
 			navigator.getUserMedia ||
 			navigator.webkitGetUserMedia ||
 			navigator.mozGetUserMedia;
-			navigator.getUserMedia(dictionary, callback);
+			navigator.getUserMedia(dictionary, callback, error);
 		} catch (e) {
 			alert('getUserMedia threw exception :' + e);
 		}
@@ -25,7 +25,9 @@ function whistlerr(whistleCallback){
 		whistleFinder();
 	}
 
-	getUserMedia({audio: true}, gotStream);
+	getUserMedia({audio: true}, gotStream, function(){
+		alert("There was an error accessing audio input. Please check.");
+	});
 
 
 	/*** Whistle Detection code ***/
@@ -81,6 +83,6 @@ function whistlerr(whistleCallback){
 		} else {
 			non_positives++;
 		}
-		window.webkitRequestAnimationFrame(whistleFinder);
+		window.requestAnimationFrame(whistleFinder);
 	}
 };
