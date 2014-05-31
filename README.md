@@ -8,5 +8,10 @@ How it works?
 
 It analyses the frequence domain data of input audio and seaches for sharp spikes in the range of 600-5000Hz. Most people blow whistles [in this band][1]. Since whistle spike is only created for certain short period of time, it neglects samples which have too many peaks. 
 
+How to use?
+===========
+
+Just include `whistle.js` and call the function `whistlerr` with a callback to be fired when the event occurs.  
+
 [1]: http://medieteknik.bth.se/fou/forskinfo.nsf/all/67a079f0676c546fc12574a4002d6d38/$file/nilsson-whistle.pdf
 [2]: http://shubhamjain.github.io/whistlerr/
