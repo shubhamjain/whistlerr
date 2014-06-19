@@ -1,17 +1,23 @@
 Whistlerr
 =========
 
-Whistlerr is a experimental whistle detection project using HTML5 WebAudio API. It is'nt perfect and may report false positives or fail to detect whistle against heavy noise but all in all it "works" fine for the most part. [Demo here][2].
+Whistlerr is a whistle detection program which uses HTML5 WebAudio API. It implements M. Nilsson's research paper titled, "[Human Whistle Detection and Frequency Estimation][1]". Although, quite accurate it may fail to work against lot of background noise. [Demo here][2].
 
 How it works?
 =============
 
-It analyses the frequence domain data of input audio and seaches for sharp spikes in the range of 600-5000Hz. Most people blow whistles [in this band][1]. Since whistle spike is only created for certain short period of time, it neglects samples which have too many peaks. 
+The basic idea is to detect the high energy spikes in the band of 500-5000Hz where most people blow whistles. The program may confuse people for it uses a lot of complex constructs, so it advised to read my blog pot explaining the same. 
 
 How to use?
 ===========
 
-Just include `whistle.js` and call the function `whistlerr` with a callback to be fired when the event occurs.  
+You have to include `lib/fft.js` and `whistle.js` and then call `whistlerr` with callback function and threshold value. Threshold is the minimum number of positive samples required to report a whistle. High threshold may fail to detect low intensity whistles while low threshold may report too many.
+
+```javascript
+whistlerr(function(result){
+	console.log("Whistle detected with data: " + result);
+}, 10);
+```
 
 [1]: http://medieteknik.bth.se/fou/forskinfo.nsf/all/67a079f0676c546fc12574a4002d6d38/$file/nilsson-whistle.pdf
 [2]: http://shubhamjain.github.io/whistlerr/
