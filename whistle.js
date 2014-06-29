@@ -8,7 +8,7 @@
  * @license    MIT License
  */
 
-function whistlerr(whistleCallback)
+function whistlerr(whistleCallback, threshold)
 {	
 	window.AudioContext = window.AudioContext || window.webkitAudioContext;
 	var audioContext = new AudioContext();
@@ -162,6 +162,7 @@ function whistlerr(whistleCallback)
 		var fft = new FFT(freqBinCount, 44100);
 
 		fft.forward(normData);
+		
 
 		var pbp = filter(fft.spectrum, BAND_PASS),	
 			pbs = filter(fft.spectrum, BAND_STOP);  
@@ -196,7 +197,7 @@ function whistlerr(whistleCallback)
 		ratio = maxpbp / (meanpbs + 1);
 		jDiff = jensenDiff(pbp);
 
-		if( ratio > 25 && jDiff > .44 && ++T > 5)
+		if( ratio > 25 && jDiff > .44 && ++T > threshold)
 			whistleCallback({
 				ratio: ratio, 
 				jDiff: jDiff
