@@ -21,7 +21,7 @@
 			document.getElementById("log").innerHTML += "Whistle (" + result.ratio + ", " + result.jDiff + ") \n";
 		};
 
-		whistlerr(callback, 4);
+		whistlerr(callback, 6);
 
 	</script>
 </head>
@@ -36,12 +36,11 @@
 		<hr />
 		<div class="row">
 			<div class="col-sm-7">
-				<p>It is a small program to detect whistiling  sound made with WebAudio API. Its a bit premature and may give false positives but it does "work". </p>
-				<p>Give it a try. Blow a whistle.<p>
+				<p>It is a small program to detect whistling  sound made with WebAudio API. It implements the M. Nilsson's research paper on the same subject and is quite accurate as compared to previous version. </p>
+				<p>Give it a try. Blow a whistle. The output will be two feature vectors that have been used to determine a whistle. For a better explanation, refer to my <a href="http://coffeecoder.net/blog/building-a-whistle-detector/"> blog post</a>.<p>
 				<textarea rows="7" cols="85" id="log"></textarea>
 			</div>
 		</div>
-		<canvas id="ss" height="600" width="1000"></canvas>
 	</div>
 </body>
 </html>
