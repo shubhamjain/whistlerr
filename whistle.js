@@ -34,7 +34,7 @@ function main() {
 			var freqPerBufferIndex = config.freqBinCount / config.sampleRate;
 
 			// Clone the array as an object
-			var clone = JSON.parse(JSON.stringify(spectrum));
+			var clone = spectrum.slice();
 
 			for( var i = 0; clone[i] !== undefined; i++ )
 
