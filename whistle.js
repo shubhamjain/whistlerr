@@ -8,6 +8,10 @@
  * @license    MIT License
  */
 
+var SMQT = require('./smqt'),
+	FFT = require('./lib/fft'),
+	jensenDiff = require('./jensenDiff');
+
 function main() {
 
 	var config = {
@@ -27,7 +31,7 @@ function main() {
 
 			/* In a spectrum of 22.05 Khz mapped to a n element
 			   array, each element correspond to freqPerBufferIndex frequncied */
-			var freqPerBufferIndex = config.freqBinCount / (config.sampleRate);
+			var freqPerBufferIndex = config.freqBinCount / config.sampleRate;
 
 			// Clone the array as an object
 			var clone = JSON.parse(JSON.stringify(spectrum));
@@ -67,83 +71,7 @@ function main() {
 			alert("There was an error accessing audio input. Please check.");
 		});
 
-		function addUp(a, b, c) {
-			var catArr = b.concat(c);
-
-			for(var i = 0; i < catArr.length ; i++) {
-				a[i] += catArr[i];
-			}
-
-			return a;
-		}
-
 		var timeBuf = new Uint8Array( config.freqBinCount ); //time domain data
-
-		// Successive Mean Quantization transform. Calculate mean and recursively partion
-		// the array into two equal halves on basis of that.
-		function SMQT( time_arr, currLevel )
-		{
-			if( currLevel == config.maxLevel + 1)
-				return [];
-
-			var U = [], one_set = [], zero_set = [], sum_samples = 0, avg_samples;
-
-			// Step 1: Calculate the mean of all samples
-			for( var i = 0; i < time_arr.length; i++ ) {
-				sum_samples += time_arr[i];
-			}
-
-			avg_samples = sum_samples / time_arr.length;
-
-			// Step 2 : Divide the samples into two set, one
-			// above average and other below average.
-			for( i = 0; i < time_arr.length; i++ ) {
-				if( time_arr[i] >= avg_samples ) {
-					U.push( Math.pow(2, config.maxLevel - currLevel) ); // 2 ^ (config.maxLevel - L)
-					one_set.push(time_arr[i]);
-				} else {
-					U.push(0);
-					zero_set.push(time_arr[i]);
-				}
-			}
-
-			return addUp(U, SMQT(one_set, currLevel + 1), SMQT(zero_set, currLevel + 1));
-		}
-
-		function normalizeSMQT(arr, smqtLevel) {
-			for ( var i = 0; i < arr.length; i++)
-				arr[i] = (arr[i] - Math.pow(2, smqtLevel - 1)) / Math.pow(2, smqtLevel - 1);
-
-			return arr;
-		}
-
-
-		/* Implementation of Jensen Difference */
-		Hv_ = 5.545177444479573;
-		function Hv(arr) {
-			var sum = 0;
-
-			for( var i = 0; arr[i] !== undefined; i++)
-				sum -= arr[i] * Math.log(arr[i]);
-
-			return sum;
-		}
-
-		function HvHv_ ( arr ) {
-			var sum = 0;
-
-			for( var i = 0; arr[i] !== undefined; i++) {
-				var X = (arr[i] + 2 / config.freqBinCount) / 2;
-				sum -= X * Math.log(X);
-			}
-
-			return sum;
-
-		}
-
-		function jensenDiff( spectrum ) {
-			return HvHv_(spectrum) - (Hv(spectrum) + Hv_) / 2;
-		}
 
 		// Variables for keeping track of positive samples per 50 samples.
 		var D = 0, T = 0,
@@ -153,12 +81,12 @@ function main() {
 
 		function whistleFinder() {
 			analyser.getByteTimeDomainData(timeBuf);
-			normData = normalizeSMQT(SMQT(timeBuf, 1), config.maxLevel);
+			SMQT.init(timeBuf, config.maxLevel).calculate();
 
 			/* FFT calculation of nomralized data */
 			fft = new FFT(config.freqBinCount, config.sampleRate);
 
-			fft.forward(normData);
+			fft.forward(SMQT.normalize());
 
 			pbp = filter(fft.spectrum, BAND_PASS);
 			pbs = filter(fft.spectrum, BAND_STOP);
@@ -189,7 +117,7 @@ function main() {
 				pbp[i] /= sumAmplitudes;
 
 			ratio = maxpbp / (meanpbs + 1);
-			jDiff = jensenDiff(pbp);
+			jDiff = jensenDiff(pbp, config.freqBinCount);
 
 			if( ratio > 25 && jDiff > 0.45 && ++T > threshold) {
 				whistleCallback({
