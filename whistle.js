@@ -20,31 +20,32 @@ function main() {
 		freqBinCount: 512
 	};
 
+	var BAND_PASS = 1, BAND_STOP = 0;
+
+	/* This filter is not accurate since the values outside the band have been attenuated to a fixed value but
+		serves a usable approximation. */
+	function filter(spectrum, type) {
+
+		/* In a spectrum of 22.05 Khz mapped to a n element
+		   array, each element correspond to freqPerBufferIndex frequncied */
+		var freqPerBufferIndex = config.freqBinCount / config.sampleRate;
+
+		// Clone the array as an object
+		var clone = spectrum.slice();
+
+		for( var i = 0; clone[i] !== undefined; i++ )
+
+			if( (type === BAND_PASS) && (i < freqPerBufferIndex * 500 || i > freqPerBufferIndex * 5000 ) )
+				clone[i] = 0.15;
+			else if( (type === BAND_STOP) &&  i > freqPerBufferIndex * 500 && i < freqPerBufferIndex * 5000 )
+				clone[i] = 0.15;
+
+		return clone;
+	}
+
+
 	window.whistlerr = function(whistleCallback, threshold) {
 		var audioContext = new AudioContext();
-
-		var BAND_PASS = 1, BAND_STOP = 0;
-
-		/* This filter is not accurate since the values outside the band have been attenuated to a fixed value but
-			serves a usable approximation. */
-		function filter(spectrum, type) {
-
-			/* In a spectrum of 22.05 Khz mapped to a n element
-			   array, each element correspond to freqPerBufferIndex frequncied */
-			var freqPerBufferIndex = config.freqBinCount / config.sampleRate;
-
-			// Clone the array as an object
-			var clone = spectrum.slice();
-
-			for( var i = 0; clone[i] !== undefined; i++ )
-
-				if( (type === BAND_PASS) && (i < freqPerBufferIndex * 500 || i > freqPerBufferIndex * 5000 ) )
-					clone[i] = 0.15;
-				else if( (type === BAND_STOP) &&  i > freqPerBufferIndex * 500 && i < freqPerBufferIndex * 5000 )
-					clone[i] = 0.15;
-
-			return clone;
-		}
 
 		function getUserMedia(dictionary, callback, error) {
 			try {
@@ -73,8 +74,7 @@ function main() {
 
 		var timeBuf = new Uint8Array( config.freqBinCount ); //time domain data
 
-		// Variables for keeping track of positive samples per 50 samples.
-		var D = 0, T = 0,
+		var totalSamples = 0, positiveSamples = 0,
 			normData, fft, pbp,
 			pbs, maxpbp, sumAmplitudes,
 			minpbp, ratio, jDiff, i;
@@ -83,19 +83,21 @@ function main() {
 			analyser.getByteTimeDomainData(timeBuf);
 			SMQT.init(timeBuf, config.maxLevel).calculate();
 
-			/* FFT calculation of nomralized data */
+			// FFT calculation of nomralized data
 			fft = new FFT(config.freqBinCount, config.sampleRate);
 
 			fft.forward(SMQT.normalize());
 
-			pbp = filter(fft.spectrum, BAND_PASS);
+			pbp = dspFilter.bandpass.simulate( fft.spectrum );
 			pbs = filter(fft.spectrum, BAND_STOP);
 
-			/* Calculating mean(pbs) max(pbp) */
+			// Calculating mean(pbs) max(pbp)
 			maxpbp = 0; sumAmplitudes = 0; minpbp = 100;
 
 			for(i = 0; i < config.freqBinCount / 2; i++) {
-				if( (pbp[i]) > maxpbp)
+
+				// Since it's a TypedArray, we can't use _Math._ operations
+				if( pbp[i] > maxpbp)
 					maxpbp = pbp[i];
 
 				if( pbp[i] < minpbp)
@@ -106,10 +108,10 @@ function main() {
 
 			meanpbs = sumAmplitudes / (i - 1);
 
-			/* Forming data for Jensen Difference */
+			// Forming data for Jensen Difference
 			sumAmplitudes = 0;
 			for( i = 0; i < config.freqBinCount / 2; i++) {
-				pbp[i] = (pbp[i] - minpbp)  + 2/config.freqBinCount;
+				pbp[i] = (pbp[i] - minpbp) + 2 / config.freqBinCount;
 				sumAmplitudes += pbp[i];
 			}
 
@@ -119,18 +121,22 @@ function main() {
 			ratio = maxpbp / (meanpbs + 1);
 			jDiff = jensenDiff(pbp, config.freqBinCount);
 
-			if( ratio > 25 && jDiff > 0.45 && ++T > threshold) {
-				whistleCallback({
-					ratio: ratio,
-					jDiff: jDiff
-				});
+			if( ratio > 25 && jDiff > 0.45) {
+			 	positiveSamples++;
+
+			 	if( positiveSamples > threshold ) {
+					whistleCallback({
+						ratio: ratio,
+						jDiff: jDiff
+					});
+			 	}
 			}
 
-			if ( D === 50 ) {
-				D = 0;
-				T = 0;
+			if ( totalSamples === 50 ) {
+				totalSamples = 0;
+				positiveSamples = 0;
 			} else {
-				D += 1;
+				totalSamples += 1;
 			}
 
 			window.requestAnimationFrame(whistleFinder);

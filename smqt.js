@@ -1,3 +1,11 @@
+// Successive Mean Quantization transform is used to remove gain / bias
+// form the signal data. Here's an execellent explaination of the
+// algorithim : https://www.toptal.com/algorithms/successive-mean-quantization-transform
+//
+// To quote the research paper —
+// 'It reduces or removes the effect of different microphones, different dynamic range,
+// bias shift and gain shift'.
+
 var SMQT = {
 	timeArr : [],
 	smqtArr : [],
@@ -45,7 +53,7 @@ var SMQT = {
 		// above average and other below average.
 		for( i = 0; i < time_arr.length; i++ ) {
 			if( time_arr[i] >= avg_samples ) {
-				U.push( Math.pow(2, this.maxLevel - currLevel) ); // 2 ^ (config.maxLevel - L)
+				U.push( 1 * Math.pow(2, this.maxLevel - currLevel) ); // conversion from binary "1" to its integer form
 				one_set.push(time_arr[i]);
 			} else {
 				U.push(0);
@@ -56,6 +64,8 @@ var SMQT = {
 		return this.addUp(U, this.SMQT(one_set, currLevel + 1), this.SMQT(zero_set, currLevel + 1));
 	},
 
+	// The result of SMQT is in the range of [0, 255]
+	// normalization makes it in the range [-1, 1]
 	normalize : function(){
 		for ( var i = 0; i < this.smqtArr.length; i++)
 			this.smqtArr[i] = (this.smqtArr[i] - Math.pow(2, this.maxLevel - 1)) / Math.pow(2, this.maxLevel - 1);
@@ -65,8 +75,4 @@ var SMQT = {
 
 };
 
-
-// Successive Mean Quantization transform. Calculate mean and recursively partion
-// the array into two equal halves on basis of that.
-//
 module.exports = SMQT;

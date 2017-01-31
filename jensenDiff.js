@@ -1,5 +1,7 @@
-/* Implementation of Jensen Difference */
-Hv_ = 5.545177444479573;
+// Implemnetation of Jensen difference.
+
+var Hv_ = 5.545177444479573;
+
 function Hv(arr) {
 	var sum = 0;
 
