@@ -1,7 +1,7 @@
 {
   "name": "whistlerr",
   "version": "0.0.1",
-  "description": "Whistle detector made with WebAudio API",
+  "description": "Whistle detector made with WebAudio API. Works in browsers and node.",
   "author": "Shubham Jain <hi@shubhamjain.co>",
   "contributors": [],
   "main": "index.js",

@@ -7,6 +7,8 @@ Sadly, the research paper has been paywalled since I wrote this code (but you're
 
 Although it's accurate, it may fail against significant background noise. [Demo here][2].
 
+Works in node and browsers.
+
 
 How it works
 =============
