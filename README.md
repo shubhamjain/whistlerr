@@ -21,16 +21,18 @@ Browser usage
 
 You have to include `build/whistle.build.js` and then call `whistlerr` with callback function and threshold value. 
 
-`threshold` is the minimum number of positive samples required to report a whistle.
+`sampleThreshold` is the minimum number of positive samples required to report a whistle.
 
-High `threshold` may fail to detect low intensity whistles while low `threshold` may report too many.
+High `sampleThreshold` may fail to detect low intensity whistles while low `sampleThreshold` may report too many.
 
 ```javascript
-var threshold = 10
+var config = {
+  sampleThreshold: 10
+};
 
 whistlerr(function(result) {
 	console.log("Whistle detected with data: " + result);
-}, threshold);
+}, config);
 ```
 
 see `demo/browser/` for a full example.

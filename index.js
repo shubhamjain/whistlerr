@@ -10,11 +10,10 @@ var SMQT = require('./lib/smqt'),
 	  FFT = require('./lib/fft'),
 	  dspFilter = require('./lib/dspFilter'),
 	  jensenDiff = require('./lib/jensenDiff'),
-	  extend = require('extend');
+	  raf = require('raf');
 
-var analyser;
 
-var config = {
+var defaultConfig = {
 	sampleRate : 44100,  // Audio Input sample rate
 	maxLevel : 8,        // Maximum level of SMQT
 	freqBinCount: 512,   // Size of FFT
@@ -23,14 +22,19 @@ var config = {
 	whistleBlockThreshold : 25, // Ratio of bandpass and bandstop blocks for 500-5000Hz
 
 	sampleThreshold : 10 // Threshold for postive samples / 50 samples
-
 };
 
-var setConfig = function( initConfig ){
-	config = extend(config, initConfig );
-};
 
-var whistlerr = function(whistleCallback) {
+module.exports = function whistlerr(whistleCallback, config) {
+
+	// config argument is optional. set it to an empty object if not present
+	if (typeof config === 'undefined' || config === null) {
+  	config = {};
+	}
+
+	// fill in all omitted config parameters with default values
+	config = Object.assign({}, defaultConfig, config)
+
 	var audioContext = new AudioContext();
 
 	function getUserMedia(dictionary, callback, error) {
@@ -46,16 +50,18 @@ var whistlerr = function(whistleCallback) {
 		// Create an AudioNode from the stream.
 		var mediaStreamSource = audioContext.createMediaStreamSource(stream);
 		// Connect it to the destination.
-		analyser = audioContext.createAnalyser();
-		analyser.fftSize = config.freqBinCount;
+		config.analyser = audioContext.createAnalyser();
+		config.analyser.fftSize = config.freqBinCount;
 
-		mediaStreamSource.connect( analyser );
+		mediaStreamSource.connect( config.analyser );
 		whistleFinder();
 	}
 
-	getUserMedia({audio: true}, gotStream, function(){
-		alert("There was an error accessing audio input. Please check.");
-	});
+	if (!config.analyser) {
+		getUserMedia({ audio: true, video: false }, gotStream, function(){
+			alert('There was an error accessing audio input. Please check.');
+		});
+	}
 
 	var timeBuf = new Uint8Array( config.freqBinCount ); //time domain data
 
@@ -65,7 +71,7 @@ var whistlerr = function(whistleCallback) {
 		minpbp, ratio, jDiff, i;
 
 	function whistleFinder() {
-		analyser.getByteTimeDomainData(timeBuf);
+		config.analyser.getByteTimeDomainData(timeBuf);
 
 		SMQT.init(timeBuf, config.maxLevel).calculate();
 
@@ -134,12 +140,6 @@ var whistlerr = function(whistleCallback) {
 			totalSamples += 1;
 		}
 
-		window.requestAnimationFrame(whistleFinder);
+		raf(whistleFinder); // cross platform requestAnimationFrame
 	}
-};
-
-
-module.exports = {
-	setConfig : setConfig,
-	detect : whistlerr
 };
