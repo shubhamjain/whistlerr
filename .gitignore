@@ -1,2 +1,2 @@
-index.html
-build/*.js
+.DS_Store
+node_modules
