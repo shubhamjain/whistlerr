@@ -4,7 +4,7 @@
   "description": "Whistle detector made with WebAudio API",
   "author": "Shubham Jain <hi@shubhamjain.co>",
   "contributors": [],
-  "main": "whistle.js",
+  "main": "index.js",
   "repository": {
 	  "type": "git",
 	  "url": "https://github.com/shubhamjain/whistlerr/"
