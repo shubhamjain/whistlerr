@@ -10,6 +10,7 @@
 
 var SMQT = require('./smqt'),
 	FFT = require('./lib/fft'),
+	dspFilter = require('./dspFilter'),
 	jensenDiff = require('./jensenDiff');
 
 function main() {
@@ -19,30 +20,6 @@ function main() {
 		maxLevel : 8,
 		freqBinCount: 512
 	};
-
-	var BAND_PASS = 1, BAND_STOP = 0;
-
-	/* This filter is not accurate since the values outside the band have been attenuated to a fixed value but
-		serves a usable approximation. */
-	function filter(spectrum, type) {
-
-		/* In a spectrum of 22.05 Khz mapped to a n element
-		   array, each element correspond to freqPerBufferIndex frequncied */
-		var freqPerBufferIndex = config.freqBinCount / config.sampleRate;
-
-		// Clone the array as an object
-		var clone = spectrum.slice();
-
-		for( var i = 0; clone[i] !== undefined; i++ )
-
-			if( (type === BAND_PASS) && (i < freqPerBufferIndex * 500 || i > freqPerBufferIndex * 5000 ) )
-				clone[i] = 0.15;
-			else if( (type === BAND_STOP) &&  i > freqPerBufferIndex * 500 && i < freqPerBufferIndex * 5000 )
-				clone[i] = 0.15;
-
-		return clone;
-	}
-
 
 	window.whistlerr = function(whistleCallback, threshold) {
 		var audioContext = new AudioContext();
@@ -59,7 +36,6 @@ function main() {
 		{
 			// Create an AudioNode from the stream.
 			var mediaStreamSource = audioContext.createMediaStreamSource(stream);
-
 			// Connect it to the destination.
 			window.analyser = audioContext.createAnalyser();
 			window.analyser.fftSize = config.freqBinCount;
@@ -81,6 +57,7 @@ function main() {
 
 		function whistleFinder() {
 			analyser.getByteTimeDomainData(timeBuf);
+
 			SMQT.init(timeBuf, config.maxLevel).calculate();
 
 			// FFT calculation of nomralized data
@@ -88,8 +65,17 @@ function main() {
 
 			fft.forward(SMQT.normalize());
 
-			pbp = dspFilter.bandpass.simulate( fft.spectrum );
-			pbs = filter(fft.spectrum, BAND_STOP);
+			pbp = dspFilter.bandpass( fft.spectrum, {
+				sampleRate : 44100,
+				fLower : 500,
+				fUpper : 5000
+			});
+
+			pbs = dspFilter.bandstop( fft.spectrum, {
+				sampleRate : 44100,
+				fLower : 500,
+				fUpper : 5000
+			});
 
 			// Calculating mean(pbs) max(pbp)
 			maxpbp = 0; sumAmplitudes = 0; minpbp = 100;
