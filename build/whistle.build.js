@@ -109,12 +109,18 @@ module.exports = function whistlerr(whistleCallback, config) {
 
 	var audioContext
 
-	function getUserMedia(dictionary, callback, error) {
-		try {
-			navigator.getUserMedia(dictionary, callback, error);
-		} catch (e) {
-			alert('getUserMedia threw exception :' + e);
-		}
+	// getUserMedia is prefixed a little differently in various browsers. handle these
+	function getUserMedia(dictionary, callback, error)
+	{
+	  try {
+	    navigator.getUserMedia = 
+	    navigator.getUserMedia ||
+	    navigator.webkitGetUserMedia ||
+	    navigator.mozGetUserMedia;
+	    navigator.getUserMedia(dictionary, callback, error);
+	  } catch (e) {
+	    alert('getUserMedia threw exception :' + e);
+	  }
 	}
 
 	function gotStream(stream)
