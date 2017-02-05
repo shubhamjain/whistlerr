@@ -13,12 +13,11 @@
 	  "url": "https://github.com/shubhamjain/whistlerr/issues"
 	},
   "keywords": [
-	  "whistle detection"
+	  "whistle", "fft", "dsp", "whistle detection"
 	],
   "dependencies": {
     "extend": "^3.0.0"
   },
-
   "devDependencies": {
   },
   "license": "MIT"
