@@ -1,7 +1,7 @@
 function bandPassFilter(spectrum, config){
 	var spectrumClone = spectrum.slice(); // spectrumClone the Array
 
-	var freqPerSpectrumElement = config.sampleRate / spectrumClone.length;
+	var freqPerSpectrumElement = config.sampleRate / (spectrumClone.length * 2);
 
 	for( var i = 0; spectrumClone[i] !== undefined; i++ ) {
 		if( i * freqPerSpectrumElement < config.fLower || i * freqPerSpectrumElement > config.fUpper )
@@ -14,7 +14,7 @@ function bandPassFilter(spectrum, config){
 function bandStopFilter(spectrum, config){
 	var spectrumClone = spectrum.slice(); // spectrumClone the Array
 
-	var freqPerSpectrumElement = config.sampleRate / spectrumClone.length;
+	var freqPerSpectrumElement = config.sampleRate / (spectrumClone.length * 2);
 
 	for( var i = 0; spectrumClone[i] !== undefined; i++ ) {
 

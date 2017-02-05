@@ -54,8 +54,6 @@
 	 * A whistle detector based on the research paper  --
 	 * "Human Whistle Detection and Frequency Estimation" by M. Nilsson and others.
 	 *
-	 * Sadly, the paper itself has been paywalled long since I wrote this code.
-	 *
 	 * @author	   Shubham Jain (hi@shubhamjain.co)
 	 * @license    MIT License
 	 */
