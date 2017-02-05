@@ -23,7 +23,11 @@
   },
   "devDependencies": {
     "audio-analyser": "^1.0.2",
-    "mic": "^2.1.1"
+    "mic": "^2.1.1",
+    "webpack": "^2.2.1"
+  },
+  "scripts": {
+    "build": "webpack"
   },
   "license": "MIT"
 }
