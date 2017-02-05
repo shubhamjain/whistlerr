@@ -6,12 +6,11 @@
  * @license    MIT License
  */
 
-var SMQT = require('./smqt'),
-	FFT = require('./lib/fft'),
-	dspFilter = require('./dspFilter'),
-	jensenDiff = require('./jensenDiff');
-
-var extend = require('extend');
+var SMQT = require('./lib/smqt'),
+	  FFT = require('./lib/fft'),
+	  dspFilter = require('./lib/dspFilter'),
+	  jensenDiff = require('./lib/jensenDiff'),
+	  extend = require('extend');
 
 var analyser;
 
