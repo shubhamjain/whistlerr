@@ -1,0 +1,25 @@
+{
+  "name": "whistlerr",
+  "version": "0.0.1",
+  "description": "Whistle detector made with WebAudio API",
+  "author": "Shubham Jain <hi@shubhamjain.co>",
+  "contributors": [],
+  "main": "whistle.js",
+  "repository": {
+	  "type": "git",
+	  "url": "https://github.com/shubhamjain/whistlerr/"
+	},
+  "bugs": {
+	  "url": "https://github.com/shubhamjain/whistlerr/issues"
+	},
+  "keywords": [
+	  "whistle detection"
+	],
+  "dependencies": {
+    "extend": "^3.0.0"
+  },
+
+  "devDependencies": {
+  },
+  "license": "MIT"
+}

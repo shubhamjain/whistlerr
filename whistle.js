@@ -1,49 +1,41 @@
 /**
- * Whistlerr
+ * A whistle detector based on the research paper  --
+ * "Human Whistle Detection and Frequency Estimation" by M. Nilsson and others.
  *
- * This program is an implementation of "Human Whistle Detection and Frequency Estimation"
- * by M. Nilsson and others. It is advised to understand the paper before this code.
- *
- * @author	   Shubham Jain (shubham@coffeecoder.net)
+ * @author	   Shubham Jain (hi@shubhamjain.co)
  * @license    MIT License
  */
 
-function whistlerr(whistleCallback, threshold)
-{	
-	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+var SMQT = require('./smqt'),
+	FFT = require('./lib/fft'),
+	dspFilter = require('./dspFilter'),
+	jensenDiff = require('./jensenDiff');
+
+var extend = require('extend');
+
+var analyser;
+
+var config = {
+	sampleRate : 44100,  // Audio Input sample rate
+	maxLevel : 8,        // Maximum level of SMQT
+	freqBinCount: 512,   // Size of FFT
+
+	jDiffThreshold : 0.45,   // Jensen Difference Threshold
+	whistleBlockThreshold : 25, // Ratio of bandpass and bandstop blocks for 500-5000Hz
+
+	sampleThreshold : 10 // Threshold for postive samples / 50 samples
+
+};
+
+var setConfig = function( initConfig ){
+	config = extend(config, initConfig );
+};
+
+var whistlerr = function(whistleCallback) {
 	var audioContext = new AudioContext();
-	var freqBinCount = 512; 
-	var BAND_PASS = 1, BAND_STOP = 0;
 
-	/* The filter implemented is not really accurate since,
-		the values outside the band have been attenuated to a fixed value but
-		serves a very good usable approximation. */
-
-	function filter(spectrum, type)
-	{
-		/* In a spectrum of 22.05 Khz mapped to a n element
-		   array, each element correspond to freqPerBufferIndex frequncied */
-		var freqPerBufferIndex = freqBinCount / (2 * 22050);
-		
-		// Clone the array as an object
-		var clone = JSON.parse(JSON.stringify(spectrum));
-		for( i = 0;typeof clone[i] != "undefined"; i++ )
-			
-			if( (type === BAND_PASS) && (i < freqPerBufferIndex * 500 || i > freqPerBufferIndex * 5000 ) )
-				clone[i] = .15;
-			else if( (type === BAND_STOP) &&  i > freqPerBufferIndex * 500 && i < freqPerBufferIndex * 5000 )
-				clone[i] = .15;
-
-		return clone;
-	}
-
-	function getUserMedia(dictionary, callback, error)
-	{
+	function getUserMedia(dictionary, callback, error) {
 		try {
-			navigator.getUserMedia = 
-			navigator.getUserMedia ||
-			navigator.webkitGetUserMedia ||
-			navigator.mozGetUserMedia;
 			navigator.getUserMedia(dictionary, callback, error);
 		} catch (e) {
 			alert('getUserMedia threw exception :' + e);
@@ -54,10 +46,9 @@ function whistlerr(whistleCallback, threshold)
 	{
 		// Create an AudioNode from the stream.
 		var mediaStreamSource = audioContext.createMediaStreamSource(stream);
-
 		// Connect it to the destination.
-		window.analyser = audioContext.createAnalyser();
-		window.analyser.fftSize = freqBinCount;
+		analyser = audioContext.createAnalyser();
+		analyser.fftSize = config.freqBinCount;
 
 		mediaStreamSource.connect( analyser );
 		whistleFinder();
@@ -67,147 +58,89 @@ function whistlerr(whistleCallback, threshold)
 		alert("There was an error accessing audio input. Please check.");
 	});
 
-	function addUp(a, b, c)
-	{
-		catArr = b.concat(c);
+	var timeBuf = new Uint8Array( config.freqBinCount ); //time domain data
 
-		for(i = 0; i < catArr.length ; i++)
-			a[i] += catArr[i];			
+	var totalSamples = 0, positiveSamples = 0,
+		normData, fft, pbp,
+		pbs, maxpbp, sumAmplitudes,
+		minpbp, ratio, jDiff, i;
 
-		return a;
-	}
+	function whistleFinder() {
+		analyser.getByteTimeDomainData(timeBuf);
 
-	var freq_buf = new Uint8Array( freqBinCount ); //frequency domain data
-	var time_buf = new Uint8Array( freqBinCount ); //time domain data
-	
-	var max_level = 8;
+		SMQT.init(timeBuf, config.maxLevel).calculate();
 
-	/* Successive Mean Quantization transform. Calculate mean and recursively partion
-	   the array into two equal halveson basis of that. */
-	function SMQT( time_arr, L )
-	{
-		if( L == max_level + 1)
-			return [];
+		// FFT calculation of nomralized data
+		fft = new FFT(config.freqBinCount, config.sampleRate);
 
-		var U = [], one_set, zero_set, sum_samples = 0, avg_samples = 0;
-		one_set = [];
-		zero_set = [];
+		fft.forward(SMQT.normalize());
 
-		for( i = 0; i < time_arr.length; i++ )
-			sum_samples += time_arr[i];
+		pbp = dspFilter.bandpass( fft.spectrum, {
+			sampleRate : config.sampleRate,
+			fLower : 500,
+			fUpper : 5000
+		});
 
-		avg_samples = sum_samples / time_arr.length;
+		pbs = dspFilter.bandstop( fft.spectrum, {
+			sampleRate : config.sampleRate,
+			fLower : 500,
+			fUpper : 5000
+		});
 
-		for( i = 0; i < time_arr.length; i++ )
-		{
-			if( time_arr[i] >= avg_samples )
-			{
-				U.push(1 << (max_level - L)); // 2 ^ (max_level - L)
-				one_set.push(time_arr[i]);
-			} else {
-				U.push(0);
-				zero_set.push(time_arr[i]);
-			}
-		}
+		// Calculating mean(pbs) max(pbp)
+		maxpbp = 0; sumAmplitudes = 0; minpbp = 100;
 
-		return addUp(U, SMQT(one_set, L + 1), SMQT(zero_set, L + 1));
-	}
+		for(i = 0; i < config.freqBinCount / 2; i++) {
 
-	function Normalize(arr, L)
-	{
-		for ( i = 0; i < arr.length; i++)
-			arr[i] = ((arr[i] - Math.pow(2, L - 1)) / Math.pow(2, L - 1));
-		
-		return arr;
-	}
-
-	/* Implementation of Jensen Difference */
-	Hv_ = 5.545177444479573;
-	function Hv(arr)
-	{
-		var sum = 0;
-		
-		for( i = 0; typeof arr[i] != "undefined";i++)
-			sum -= arr[i] * Math.log(arr[i]);
-
-		return sum;
-	}
-
-	function HvHv_ ( arr )
-	{
-		var sum = 0;
-		for( i = 0; typeof arr[i] != "undefined"; i++)
-		{
-			X = (arr[i] + 2/freqBinCount)/2;
-			sum -= X * Math.log(X);
-		}
-
-		return sum;
-
-	}
-
-	function jensenDiff( spectrum )
-	{ 
-		return HvHv_(spectrum) - (Hv(spectrum) + Hv_)/2;
-	}
-
-	// Variables for keeping track of positive samples per 50 samples. 
-	D = 0, T = 0;
-	function whistleFinder()
-	{
-		analyser.getByteTimeDomainData(time_buf);
-		normData = Normalize(SMQT(time_buf, 1), max_level);
-
-		/* FFT calculation of nomralized data */
-		var fft = new FFT(freqBinCount, 44100);
-
-		fft.forward(normData);
-		
-
-		var pbp = filter(fft.spectrum, BAND_PASS),	
-			pbs = filter(fft.spectrum, BAND_STOP);  
-
-
-		/* Calculating mean(pbs) max(pbp) */ 
-		maxpbp = 0, sumAmplitudes = 0, minpbp = 100;
-		for(i = 0; i < freqBinCount / 2; i++)
-		{			
-			if( (pbp[i]) > maxpbp)
+			// Since it's a TypedArray, we can't use _Math._ operations
+			if( pbp[i] > maxpbp)
 				maxpbp = pbp[i];
 
 			if( pbp[i] < minpbp)
 				minpbp = pbp[i];
 
-			sumAmplitudes += Math.abs(pbs[i]);		
+			sumAmplitudes += Math.abs(pbs[i]);
 		}
 
 		meanpbs = sumAmplitudes / (i - 1);
 
-		/* Forming data for Jensen Difference */
+		// Forming data for Jensen Difference
 		sumAmplitudes = 0;
-		for( i = 0; i < freqBinCount / 2; i++)
-		{
-			pbp[i] = (pbp[i] - minpbp)  + 2/freqBinCount;
+		for( i = 0; i < config.freqBinCount / 2; i++) {
+			pbp[i] = (pbp[i] - minpbp) + 2 / config.freqBinCount;
 			sumAmplitudes += pbp[i];
 		}
 
-		for( i = 0; i < freqBinCount / 2; i++)
+		for( i = 0; i < config.freqBinCount / 2; i++)
 			pbp[i] /= sumAmplitudes;
 
 		ratio = maxpbp / (meanpbs + 1);
-		jDiff = jensenDiff(pbp);
+		jDiff = jensenDiff(pbp, config.freqBinCount);
 
-		if( ratio > 25 && jDiff > .44 && ++T > threshold)
-			whistleCallback({
-				ratio: ratio, 
-				jDiff: jDiff
-			});
+		if( ratio > config.whistleBlockThreshold && jDiff > config.jDiffThreshold) {
+		 	positiveSamples++;
 
-		if ( D == 50 )
-			D = 0, T = 0;
-		else
-			D++;
+		 	if( positiveSamples > config.sampleThreshold ) {
+				whistleCallback({
+					ratio: ratio,
+					jDiff: jDiff
+				});
+		 	}
+		}
+
+		if ( totalSamples === 50 ) {
+			totalSamples = 0;
+			positiveSamples = 0;
+		} else {
+			totalSamples += 1;
+		}
 
 		window.requestAnimationFrame(whistleFinder);
 	}
+};
+
+
+module.exports = {
+	setConfig : setConfig,
+	detect : whistlerr
 };

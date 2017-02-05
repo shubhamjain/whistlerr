@@ -1,51 +1,65 @@
-﻿
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
-<head>		
-	<title>Whistle detector</title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<link href='http://fonts.googleapis.com/css?family=Imprima' rel='stylesheet' type='text/css'>
-	<link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
-	<style type="text/css">
-	body
-	{
-		background: #FAF8EF;
-		font-family: 'Imprima', sans-serif;
-	}
-	</style>
-  	<script src="lib/fft.js"></script>
-	<script type="text/javascript" src="whistle.js"></script>
-	<script type="text/javascript">
-		callback = function(result){
-			document.getElementById("log").innerHTML += "Whistle (" + result.ratio + ", " + result.jDiff + ") \n";
-		};
+<head>
+    <title>Whistle detector</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='//fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+    body
+    {
+        background: #000;
+        color: #FFF;
+        font-family: 'Ubuntu', sans-serif;
+    }
 
-		whistlerr(callback, 6);
+    h1 {
+        padding: 0px 0px 20px 0px;
+        border-bottom: 1px solid #FFF;
+    }
 
-	</script>
+    p {
+        font-size: 15px;
+    }
+    </style>
+    <script type="text/javascript" src="./build/whistle.build.js"></script>
+    <script type="text/javascript" src="./sketch.js"></script>
+    <script type="text/javascript" src="./sketch-particles.js"></script>
 </head>
 <body>
-	<div class="container fixed-width">
-		<div class="row">
-			<div class="col-sm-5">
-				<h1> Whistlerr</h1>
-				<h4> Whistle detector </h4>
-			</div>			
-		</div>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <h1> Whistlerr</h1>
+                <br>
+                <p> Whistlerr detects whistling sounds from the microphone using the Web Audio API.
+                It's based on a research paper <a href='https://www.diva-portal.org/smash/get/diva2:836227/FULLTEXT01.pdf'>Human Whistle Detection and Frequency Estimation</a> by M. Nilsson.</p>
+                <p>
+                Permit the microphone request, blow a whistle and watch as the particles swirl. Please excuse the false positives! :)
+              </p>
+                <p> <a href="https://github.com/shubhamjain/whistlerr">Github Source</a> </p>
+            </div>
+        </div>
 
-		<hr />
-		<div class="row">
-			<div class="col-sm-7">
-				<p>It is a small program to detect whistling  sound made with WebAudio API. It implements the M. Nilsson's research paper on the same subject and is quite accurate as compared to previous version. </p>
-				<p>Give it a try. Blow a whistle. The output will be two feature vectors that have been used to determine a whistle. For a better explanation, refer to my <a href="http://coffeecoder.net/blog/building-a-whistle-detector/"> blog post</a>. <p>
+        <div class="row">
+            <div class="col-sm-12" id="container" style="height: 700px"></div>
+        </div>
+        <script>
+            whistlerr.setConfig({
+                sampleThreshold : 8
+            });
 
-				<textarea rows="7" cols="88" id="log"></textarea>
+            whistlerr.detect(function(){
+                var containerWidth = demo.container.offsetWidth;
+                var containerHeight = demo.container.offsetHeight;
 
-				<p><a href="http://github.com/shubhamjain">Fork me on Github!</a></p>
-			</div>
-		</div>
-	</div>
+                demo.spawn( (Math.random() * 10000) % containerWidth, (Math.random() * 10000) % containerHeight);
+            });
+        </script>
+    </div>
 </body>
 </html>
-		
+
+
