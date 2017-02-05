@@ -35,7 +35,7 @@ module.exports = function whistlerr(whistleCallback, config) {
 	// fill in all omitted config parameters with default values
 	config = Object.assign({}, defaultConfig, config)
 
-	var audioContext = new AudioContext();
+	var audioContext
 
 	function getUserMedia(dictionary, callback, error) {
 		try {
@@ -57,18 +57,21 @@ module.exports = function whistlerr(whistleCallback, config) {
 		whistleFinder();
 	}
 
-	if (!config.analyser) {
-		getUserMedia({ audio: true, video: false }, gotStream, function(){
-			alert('There was an error accessing audio input. Please check.');
-		});
-	}
-
 	var timeBuf = new Uint8Array( config.freqBinCount ); //time domain data
 
 	var totalSamples = 0, positiveSamples = 0,
 		normData, fft, pbp,
 		pbs, maxpbp, sumAmplitudes,
 		minpbp, ratio, jDiff, i;
+
+	if (!config.analyser) {
+		audioContext = new AudioContext();
+		getUserMedia({ audio: true, video: false }, gotStream, function(){
+			alert('There was an error accessing audio input. Please check.');
+		});
+	} else {
+		whistleFinder();
+	}
 
 	function whistleFinder() {
 		config.analyser.getByteTimeDomainData(timeBuf);

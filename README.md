@@ -38,6 +38,10 @@ whistlerr(function(result) {
 see `demo/browser/` for a full example.
 
 
+Node usage
+===========
+see `demo/node/` for a full example.
+
 
 [1]: https://www.diva-portal.org/smash/get/diva2:836227/FULLTEXT01.pdf
 [2]: http://shubhamjain.github.io/whistlerr/

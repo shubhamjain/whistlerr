@@ -21,6 +21,9 @@
   "dependencies": {
     "raf": "^3.3.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "audio-analyser": "^1.0.2",
+    "mic": "^2.1.1"
+  },
   "license": "MIT"
 }
