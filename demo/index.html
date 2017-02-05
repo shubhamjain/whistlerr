@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Whistle detector</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='//fonts.googleapis.com/css?family=Imprima' rel='stylesheet' type='text/css'>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+    body
+    {
+        background: #FAF8EF;
+        font-family: 'Imprima', sans-serif;
+    }
+    </style>
+    <script type="text/javascript" src="../build/whistle.build.js"></script>
+    <script type="text/javascript">
+        callback = function(result){
+            document.getElementById("log").innerHTML += "Whistle (" + result.ratio + ", " + result.jDiff + ") \n";
+        };
+
+        whistlerr.detect(callback);
+
+    </script>
+</head>
+<body>
+    <div class="container fixed-width">
+        <div class="row">
+            <div class="col-sm-5">
+                <h1> Whistlerr</h1>
+                <h4> Whistle detector </h4>
+            </div>
+        </div>
+
+        <hr />
+        <div class="row">
+            <div class="col-sm-7">
+                <p>It is a small program to detect whistling  sound made with WebAudio API. It implements the M. Nilsson's research paper on the same subject and is quite accurate as compared to previous version. </p>
+                <p>Give it a try. Blow a whistle. The output will be two feature vectors that have been used to determine a whistle. For a better explanation, refer to my <a href="http://coffeecoder.net/blog/building-a-whistle-detector/"> blog post</a>. <p>
+
+                <textarea rows="7" cols="88" id="log"></textarea>
+
+                <p><a href="http://github.com/shubhamjain">Fork me on Github!</a></p>
+            </div>
+        </div>
+        <div id="conta_iner" style="width: 300px; height: 300px;"></div>
+    </div>
+</body>
+</html>
+
+
