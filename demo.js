@@ -1,1 +1,0 @@
-window.whistlerr = require('./whistle');
