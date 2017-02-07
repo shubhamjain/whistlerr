@@ -1,25 +1,33 @@
 {
   "name": "whistlerr",
   "version": "0.0.1",
-  "description": "Whistle detector made with WebAudio API",
+  "description": "Whistle detector made with WebAudio API. Works in browsers and node.",
   "author": "Shubham Jain <hi@shubhamjain.co>",
   "contributors": [],
-  "main": "whistle.js",
+  "main": "index.js",
   "repository": {
-	  "type": "git",
-	  "url": "https://github.com/shubhamjain/whistlerr/"
-	},
-  "bugs": {
-	  "url": "https://github.com/shubhamjain/whistlerr/issues"
-	},
-  "keywords": [
-	  "whistle detection"
-	],
-  "dependencies": {
-    "extend": "^3.0.0"
+    "type": "git",
+    "url": "https://github.com/shubhamjain/whistlerr/"
   },
-
+  "bugs": {
+    "url": "https://github.com/shubhamjain/whistlerr/issues"
+  },
+  "keywords": [
+    "whistle",
+    "fft",
+    "dsp",
+    "whistle detection"
+  ],
+  "dependencies": {
+    "raf": "^3.3.0"
+  },
   "devDependencies": {
+    "audio-analyser": "^1.0.2",
+    "mic": "^2.1.1",
+    "webpack": "^2.2.1"
+  },
+  "scripts": {
+    "build": "webpack"
   },
   "license": "MIT"
 }

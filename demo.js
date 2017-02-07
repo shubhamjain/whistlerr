@@ -1,1 +1,1 @@
-window.whistlerr = require('./whistle');
+window.whistlerr = require('./');

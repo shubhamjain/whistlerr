@@ -24,7 +24,7 @@
         font-size: 15px;
     }
     </style>
-    <script type="text/javascript" src="../build/whistle.build.js"></script>
+    <script type="text/javascript" src="../../build/whistle.build.js"></script>
     <script type="text/javascript" src="./sketch.js"></script>
     <script type="text/javascript" src="./sketch-particles.js"></script>
 </head>
@@ -47,16 +47,16 @@
             <div class="col-sm-12" id="container" style="height: 700px"></div>
         </div>
         <script>
-            whistlerr.setConfig({
-                sampleThreshold : 8
-            });
+            var config = {
+                sampleThreshold: 8
+            };
 
-            whistlerr.detect(function(){
+            whistlerr(function() {
                 var containerWidth = demo.container.offsetWidth;
                 var containerHeight = demo.container.offsetHeight;
 
                 demo.spawn( (Math.random() * 10000) % containerWidth, (Math.random() * 10000) % containerHeight);
-            });
+            }, config);
         </script>
     </div>
 </body>
