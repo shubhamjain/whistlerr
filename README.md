@@ -3,8 +3,6 @@ Whistlerr
 
 Whistlerr is a whistle detection program which implements M. Nilsson's research paper - "[Human Whistle Detection and Frequency Estimation][1]".
 
-Sadly, the research paper has been paywalled since I wrote this code (but you're free to make use of site made by Kazakh researcher). 
-
 Although it's accurate, it may fail against significant background noise. [Demo here][2].
 
 Works in node and browsers.
@@ -13,15 +11,15 @@ Works in node and browsers.
 How it works
 =============
 
-The basic idea is to detect the high energy spikes in the band of 500-5000Hz where most people blow whistles.
+It works by detecting high energy spikes in the band of 500-5000Hz where most people blow whistles.
 
-It uses the HTML5 WebAudio API. 
+On the browser it uses HTML5 WebAudio API, and on node it relies on [mic](https://www.npmjs.com/package/mic) npm module.
 
 
 Browser usage
 ===========
 
-You have to include `build/whistle.build.js` and then call `whistlerr` with callback function and threshold value. 
+You have to include `build/whistle.build.js` and then call `whistlerr` with callback function and threshold value.
 
 `sampleThreshold` is the minimum number of positive samples required to report a whistle.
 
