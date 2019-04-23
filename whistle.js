@@ -34,6 +34,11 @@ var setConfig = function( initConfig ){
 var whistlerr = function(whistleCallback) {
 	var audioContext = new AudioContext();
 
+	navigator.getUserMedia = ( navigator.getUserMedia ||
+		navigator.webkitGetUserMedia ||
+		navigator.mozGetUserMedia ||
+		navigator.msGetUserMedia);
+
 	function getUserMedia(dictionary, callback, error) {
 		try {
 			navigator.getUserMedia(dictionary, callback, error);
