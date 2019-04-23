@@ -1,7 +1,7 @@
  module.exports = {
      entry: './demo.js',
      output: {
-         path: './build',
+         path: __dirname + '/build',
          filename: 'whistle.build.js'
      }
  };
