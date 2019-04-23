@@ -5,7 +5,7 @@ Whistlerr is a whistle detection program which implements M. Nilsson's research 
 
 Although it's accurate, it may fail against significant background noise. [Demo here][2].
 
-Works in node and browsers.
+Tested in node and Chrome and Safari browser.
 
 
 How it works
