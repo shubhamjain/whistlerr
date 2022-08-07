@@ -26,21 +26,21 @@ You have to include `build/whistle.build.js` and then call `whistlerr` with call
 High `sampleThreshold` may fail to detect low intensity whistles while low `sampleThreshold` may report too many.
 
 ```javascript
-var config = {
-  sampleThreshold: 10
-};
+whistlerr.setConfig({
+    sampleThreshold : 8
+});
 
-whistlerr(function(result) {
-	console.log("Whistle detected with data: " + result);
-}, config);
+whistlerr.detect(function(){
+    console.log("Whistle detected: ", result)
+});
 ```
 
-see `demo/browser/` for a full example.
+see `docs/index.html` for a full example.
 
 
 Node usage
 ===========
-see `demo/node/` for a full example.
+see `node/index` for a full example.
 
 
 [1]: https://www.diva-portal.org/smash/get/diva2:836227/FULLTEXT01.pdf
