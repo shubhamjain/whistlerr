@@ -2,7 +2,7 @@
 
 const Analyser  = require('audio-analyser')
 const mic       = require('mic')
-const whistlerr = require('../../index')
+const whistlerr = require('../index')
 
 
 const CHANNEL_COUNT = 1
@@ -30,12 +30,9 @@ const analyser = new Analyser({
   channel: 0,
 
   // Size of time data to buffer 
-  bufferSize: SAMPLE_RATE,
-
-  // Windowing function for fft, https://github.com/scijs/window-functions 
-  applyWindow: function (sampleNumber, totalSamples) {
-  }
+  bufferSize: SAMPLE_RATE
 })
+
 
 const micInstance = mic({ 'rate': SAMPLE_RATE.toString(), 'channels': CHANNEL_COUNT.toString(), 'debug': false, 'exitOnSilence': 0 })
 const micInputStream = micInstance.getAudioStream()
@@ -50,6 +47,8 @@ const config = {
   freqBinCount: analyser.frequencyBinCount
 }
 
-whistlerr(function(result) {
+whistlerr.setConfig(config);
+whistlerr.whistleFinder(analyser, function(result) {
   console.log('Whistle (' + result.ratio + ', ' + result.jDiff + ')')
-}, config)
+});
+

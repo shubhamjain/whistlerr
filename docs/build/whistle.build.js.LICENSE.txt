@@ -1,0 +1,7 @@
+/**
+ * A whistle detector based on the research paper  --
+ * "Human Whistle Detection and Frequency Estimation" by M. Nilsson and others.
+ *
+ * @author	   Shubham Jain (hi@shubhamjain.co)
+ * @license    MIT License
+ */

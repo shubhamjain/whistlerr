@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Whistle detector</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href='//fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
+    <style type="text/css">
+    body
+    {
+        background: #000;
+        color: #FFF;
+        font-family: 'Ubuntu', sans-serif;
+    }
+
+    .heading {
+        padding: 0px 0px 20px 0px;
+        border-bottom: 1px solid #FFF;
+    }
+
+    a {
+        color: #428bca;
+        text-decoration: none;
+        padding-bottom: 1px;
+        border-bottom: 1px solid #428bca;
+    }
+
+    p {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .row {
+        max-width: 600px;
+    }
+    .container {
+        padding: 20px;
+    }
+    
+    .source {
+        position: absolute;
+        bottom: 20px;
+        right: 10px;
+    }
+    </style>
+    <script type="text/javascript" src="./build/whistle.build.js"></script>
+    <script type="text/javascript" src="./sketch.js"></script>
+    <script type="text/javascript" src="./sketch-particles.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+                <h1 class="heading"> Whistlerr</h1>
+
+                <p> Whistlerr detects whistling sounds from the microphone using the Web Audio API.
+                It's based on a research paper <a href='https://www.diva-portal.org/smash/get/diva2:836227/FULLTEXT01.pdf'>Human Whistle Detection and Frequency Estimation</a> by M. Nilsson.</p>
+                <p>
+                <strong><a id="clickhere" href="#">Click Here</a></strong> to start detecting. You'll need to give permission to access the microphone.
+              </p>
+              <p>Blow a whistle and watch as the particles swirl. Please excuse the false positives! :)</p>
+                <p> <a href="https://github.com/shubhamjain/whistlerr" class="source">Github Source</a> </p>
+        </div>
+
+        <div>
+            <div id="container" style="height: 50vh;"></div>
+        </div>
+        <script>
+            whistlerr.setConfig({
+                sampleThreshold : 8
+            });
+
+            document.getElementById('clickhere').addEventListener('click', function(){
+                whistlerr.detect(function(){
+                    var containerWidth = demo.container.offsetWidth;
+                    var containerHeight = demo.container.offsetHeight;
+
+                    demo.spawn( (Math.random() * 10000) % containerWidth, (Math.random() * 10000) % containerHeight);
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
+

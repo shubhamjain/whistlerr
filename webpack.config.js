@@ -1,7 +1,10 @@
- module.exports = {
-     entry: './demo.js',
-     output: {
-         path: './build',
-         filename: 'whistle.build.js'
-     }
- };
+const path = require('path');
+
+module.exports = {
+    entry: './demo.js',
+    mode: 'development',
+    output: {
+        path: path.resolve(__dirname, './docs/build'),
+        filename: 'whistle.build.js'
+    }
+};
